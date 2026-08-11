@@ -65,20 +65,29 @@ Insert the following configuration. Replace `YOUR_DOMAIN_OR_IP` with your actual
 server {
     listen 80;
     server_name YOUR_DOMAIN_OR_IP;
-    root /var/www/myphpapp;
+    root /var/www/bludit;
     
-    index index.php index.html index.htm;
+    index index.php index.html;
 
-    # URL Routing / Clean URLs for CMS
+    # Isolated Application Logs
+    access_log /var/log/nginx/bludit-access.log;
+    error_log  /var/log/nginx/bludit-error.log;
+
+    # Clean URL Routing for WordPress
     location / {
-        try_files $uri $uri/ /index.php?$args;
+        try_files $uri $uri/ /index.php?$query_string;
     }
 
-    # Secure PHP Execution Block
+    # PHP-FPM Processing
     location ~ \.php$ {
         include snippets/fastcgi-php.conf;
-        # Use absolute socket path here
-        fastcgi_pass unix:/var/run/php/php8.3-fpm.sock; 
+        # Ensure the PHP version matches your installed version (e.g., 8.1, 8.3)
+        fastcgi_pass unix:/var/run/php/php8.x-fpm.sock;
+    }
+
+    # Security: Block access to hidden configuration files
+    location ~ /\.ht {
+        deny all;
     }
 }
 ```
