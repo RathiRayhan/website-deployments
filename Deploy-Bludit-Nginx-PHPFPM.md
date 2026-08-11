@@ -73,7 +73,7 @@ server {
     access_log /var/log/nginx/bludit-access.log;
     error_log  /var/log/nginx/bludit-error.log;
 
-    # Clean URL Routing for WordPress
+    # Clean URL Routing for Bludit
     location / {
         try_files $uri $uri/ /index.php?$query_string;
     }

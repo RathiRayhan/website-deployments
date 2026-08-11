@@ -52,7 +52,7 @@ sudo mkdir -p /var/www/wordpress
 cd /var/www/wordpress
 
 # Clone WordPress core
-sudo git clone [https://github.com/WordPress/WordPress.git](https://github.com/WordPress/WordPress.git) .
+sudo git clone https://github.com/WordPress/WordPress.git .
 
 # Enforce secure ownership for the Nginx worker process
 sudo chown -R www-data:www-data /var/www/wordpress
