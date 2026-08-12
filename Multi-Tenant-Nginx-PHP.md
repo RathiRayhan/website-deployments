@@ -32,7 +32,7 @@ Create a dedicated PHP-FPM pool configuration so the tenant's PHP code executes 
 ```bash
 sudo nano /etc/php/8.3/fpm/pool.d/first-site.conf
 ```
-Note: We could have also use the original www.conf file and `sudo cp /etc/php/8.3/fpm/pool.d/www.conf /etc/php/8.3/fpm/pool.d/first-site.conf`
+Note: We could have also use the original `www.conf` file and `sudo cp /etc/php/8.3/fpm/pool.d/www.conf /etc/php/8.3/fpm/pool.d/first-site.conf`
 
 **Configuration (`first-site.conf`):**
 ```ini
