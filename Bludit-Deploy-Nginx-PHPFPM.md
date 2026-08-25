@@ -41,8 +41,8 @@ Create the project directory, clone the repository, and apply strict production 
 
 ```bash
 # Create directory and navigate into it
-sudo mkdir -p /var/www/myphpapp
-cd /var/www/myphpapp
+sudo mkdir -p /var/www/bludit
+cd /var/www/bludit
 
 # Clone the official Bludit repository directly into the current directory
 sudo git clone https://github.com/bludit/bludit.git .
