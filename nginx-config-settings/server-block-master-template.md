@@ -43,7 +43,7 @@ real_ip_header CF-Connecting-IP;
 
 ---
 
-## 2. Modern App (Node.js / Next.js) — WITH Cloudflare
+## 2. Modern App (Node.js backend/ Next.js) — WITH Cloudflare
 Use this when the application relies on WebSockets (Live Reload, Chat) and is proxied through Cloudflare.
 
 **File Location:** `/etc/nginx/sites-available/yourdomain`
@@ -76,7 +76,7 @@ server {
 
 ---
 
-## 3. Modern App (Node.js / Next.js) — NO Cloudflare (Direct)
+## 3. Modern App (Node.js backend/ Next.js) — NO Cloudflare (Direct)
 Use this for standard VPS deployments without Cloudflare proxy.
 
 ```nginx
@@ -167,8 +167,58 @@ server {
     }
 }
 ```
+---
 
-## 6. [BONUS] Auto-Update Cloudflare IPs (Pro-Level Automation)
+## 6. Full-Stack App (Frontend + Backend on Same Domain + CF Proxied)
+Use this when hosting both a static frontend (React/Vue) and an API backend (Node.js) on the exact same domain to avoid CORS issues and save resources. 
+- `/` serves the static React build.
+- `/api/` proxies requests to the Node.js backend.
+
+```nginx
+server {
+    listen 80;
+    server_name yourdomain.com www.yourdomain.com;
+
+    access_log /var/log/nginx/yourdomain_access.log;
+    error_log /var/log/nginx/yourdomain_error.log warn;
+
+    # 1. FRONTEND: Serve Static React/SPA Build
+    location / {
+        root /var/www/yourdomain/frontend/build;
+        index index.html;
+        # Fallback for client-side routing
+        try_files $uri $uri/ /index.html;
+    }
+
+    # 2. BACKEND: Proxy all API requests to Node.js
+    location /api/ {
+        # Note: Depending on your Node app, you might need to strip the '/api' prefix.
+        # For the trailing slash look at the routes folder of the project
+        # But generally, just passing it to the backend port works if the backend expects it.
+        proxy_pass http://127.0.0.1:3000;
+
+        # WebSockets Support (if the backend uses Socket.io etc.)
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+
+        # Identity & Cloudflare Headers
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header CF-Connecting-IP $http_cf_connecting_ip;
+    }
+
+    # Optional but googd to have: Cache static assets for the frontend
+    location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg)$ {
+        root /var/www/yourdomain/frontend/build;
+        expires max;
+        log_not_found off;
+    }
+}
+```
+
+## 7. [BONUS] Auto-Update Cloudflare IPs (Pro-Level Automation)
 Cloudflare rarely changes their IP ranges, so a static list is usually fine. However, for premium clients, you can set up a bash script and a cron job to automatically fetch and update these IPs weekly. This guarantees the server will never block real users if Cloudflare updates their network.
 
 ### Step 1: Create the Bash Script
@@ -232,3 +282,8 @@ sudo crontab -e
 0 2 * * 1 /usr/local/bin/update-cloudflare-ips.sh > /dev/null 2>&1
 ```
 *(The `> /dev/null 2>&1` part ensures it runs silently in the background without spamming system mail).*
+
+**Test using:** 
+```bash
+sudo /usr/local/bin/update-cloudflare-ips.sh
+```
