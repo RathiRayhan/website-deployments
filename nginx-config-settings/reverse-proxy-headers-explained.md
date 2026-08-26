@@ -52,6 +52,21 @@ When traffic goes through Cloudflare and then Nginx, the backend (Node.js) loses
 
 ---
 
+## 5. The Nginx Real IP Module (Cloudflare Global Config)
+**Location:** `/etc/nginx/conf.d/cloudflare.conf` (Set globally, do NOT put this inside individual site blocks).
+
+To make Nginx natively replace Cloudflare's proxy IPs with the actual visitor's IP in your access logs and security tools (like Fail2ban), you must use these two essential directives:
+
+*   `set_real_ip_from <IP_Range>;`
+    *   **What it does:** Tells Nginx to *trust* these specific IP ranges (Cloudflare's network). 
+    *   **Why you need it:** Nginx shouldn't trust just anyone who sends a fake IP header. By defining Cloudflare's IPs here, Nginx knows: *"If a request comes from these specific servers, I am allowed to trust the hidden header they send."*
+
+*   `real_ip_header CF-Connecting-IP;`
+    *   **What it does:** Instructs Nginx to look inside this exact header (`CF-Connecting-IP`) to extract the true visitor's IP address.
+    *   **Why you need it:** Once Nginx verifies the request came from a trusted Cloudflare IP (via `set_real_ip_from`), it takes the IP found in this header and permanently overwrites Nginx's internal `$remote_addr` variable. Because of this single line, your `access.log` and Fail2ban will automatically see the real user, not Cloudflare.
+    
+---
+
 ## Quick Summary: When to use what?
 
 | Situation | Which Headers to Use? |
