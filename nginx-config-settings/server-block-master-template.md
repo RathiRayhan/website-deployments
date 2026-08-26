@@ -43,7 +43,7 @@ real_ip_header CF-Connecting-IP;
 
 ---
 
-## 2. Modern App (Node.js backend/ Next.js) — WITH Cloudflare
+## 2. Modern App (Node.js backend / Next.js) — WITH Cloudflare
 Use this when the application relies on WebSockets (Live Reload, Chat) and is proxied through Cloudflare.
 
 **File Location:** `/etc/nginx/sites-available/yourdomain`
@@ -71,12 +71,18 @@ server {
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header CF-Connecting-IP $http_cf_connecting_ip;
     }
+
+    # Security: Deny access to all hidden files (.env, .git, etc.)
+    # Logs are kept ON intentionally for Fail2ban to detect and block malicious bots
+    location ~ /\. {
+        deny all;
+    }
 }
 ```
 
 ---
 
-## 3. Modern App (Node.js backend/ Next.js) — NO Cloudflare (Direct)
+## 3. Modern App (Node.js backend / Next.js) — NO Cloudflare (Direct)
 Use this for standard VPS deployments without Cloudflare proxy.
 
 ```nginx
@@ -99,6 +105,11 @@ server {
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+
+    # Security: Deny access to all hidden files (.env, .git, etc.)
+    location ~ /\. {
+        deny all;
     }
 }
 ```
@@ -129,6 +140,11 @@ server {
     location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg)$ {
         expires max;
         log_not_found off;
+    }
+
+    # Security: Deny access to all hidden files (.env, .git, etc.)
+    location ~ /\. {
+        deny all;
     }
 }
 ```
@@ -161,12 +177,13 @@ server {
         fastcgi_pass unix:/var/run/php/php8.1-fpm.sock; 
     }
 
-    # Deny access to hidden files (Security best practice)
-    location ~ /\.ht {
+    # Security: Deny access to all hidden files (.env, .git, .ht, etc.)
+    location ~ /\. {
         deny all;
     }
 }
 ```
+
 ---
 
 ## 6. Full-Stack App (Frontend + Backend on Same Domain + CF Proxied)
@@ -193,7 +210,7 @@ server {
     # 2. BACKEND: Proxy all API requests to Node.js
     location /api/ {
         # Note: Depending on your Node app, you might need to strip the '/api' prefix.
-        # For the trailing slash look at the routes folder of the project
+        # For the trailing slash look at the routes folder of the project.
         # But generally, just passing it to the backend port works if the backend expects it.
         proxy_pass http://127.0.0.1:3000;
 
@@ -209,14 +226,21 @@ server {
         proxy_set_header CF-Connecting-IP $http_cf_connecting_ip;
     }
 
-    # Optional but googd to have: Cache static assets for the frontend
+    # Optional but good to have: Cache static assets for the frontend
     location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg)$ {
         root /var/www/yourdomain/frontend/build;
         expires max;
         log_not_found off;
     }
+
+    # Security: Deny access to all hidden files (.env, .git, etc.)
+    location ~ /\. {
+        deny all;
+    }
 }
 ```
+
+---
 
 ## 7. [BONUS] Auto-Update Cloudflare IPs (Pro-Level Automation)
 Cloudflare rarely changes their IP ranges, so a static list is usually fine. However, for premium clients, you can set up a bash script and a cron job to automatically fetch and update these IPs weekly. This guarantees the server will never block real users if Cloudflare updates their network.
@@ -244,12 +268,12 @@ echo "" >> $TEMP_FILE
 
 # Fetch IPv4
 echo "# IPv4 Ranges" >> $TEMP_FILE
-curl -s https://www.cloudflare.com/ips-v4 | sed -e 's/^/set_real_ip_from /' -e 's/$/;/' >> $TEMP_FILE
+curl -s [https://www.cloudflare.com/ips-v4](https://www.cloudflare.com/ips-v4) | sed -e 's/^/set_real_ip_from /' -e 's/$/;/' >> $TEMP_FILE
 echo "" >> $TEMP_FILE
 
 # Fetch IPv6
 echo "# IPv6 Ranges" >> $TEMP_FILE
-curl -s https://www.cloudflare.com/ips-v6 | sed -e 's/^/set_real_ip_from /' -e 's/$/;/' >> $TEMP_FILE
+curl -s [https://www.cloudflare.com/ips-v6](https://www.cloudflare.com/ips-v6) | sed -e 's/^/set_real_ip_from /' -e 's/$/;/' >> $TEMP_FILE
 echo "" >> $TEMP_FILE
 
 # Add the essential header directive
