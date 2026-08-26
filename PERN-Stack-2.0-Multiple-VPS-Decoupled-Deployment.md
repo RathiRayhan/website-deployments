@@ -159,7 +159,7 @@ REACT_APP_BACKEND_API=https://api.rathirayhan.dpdns.org/api/v1/restaurants
 ```
 
 > 🛠 **Troubleshooting the 404 Error (Option 1 vs Option 2):**
-> Initially, setting the variable to just `[https://api.rathirayhan.dpdns.org/](https://api.rathirayhan.dpdns.org/)` resulted in a 404 Not Found error. This happens because the backend API is specifically listening on the `/api/v1/restaurants` route. 
+> Initially, setting the variable to just `https://api.rathirayhan.dpdns.org/` resulted in a 404 Not Found error. This happens because the backend API is specifically listening on the `/api/v1/restaurants` route. 
 > *   **Option 1 (Developer Approach):** Keep the `.env` root URL, but modify the backend `server.js` routing logic from `app.get("/api/v1/restaurants")` to `app.get("/")`.
 > *   **Option 2 (DevOps Approach - Recommended):** Do not alter the backend application logic. Instead, append the exact URI path (`/api/v1/restaurants`) directly to the `.env` file on the frontend. We utilized Option 2 to maintain architectural integrity.
 
