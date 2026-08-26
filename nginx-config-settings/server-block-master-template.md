@@ -1,14 +1,64 @@
 # Nginx Master Configuration Templates (Production Ready)
 
-This document contains standard, industry-ready Nginx server block templates for various tech stacks. 
+This runbook contains standard, industry-ready Nginx server block templates for various tech stacks. 
 
-**Important:** When a client uses Cloudflare (Proxy turned ON / Orange Cloud), you MUST configure the global Cloudflare Real IP list first (Section 1). Only then use the site-specific templates.
+**Important Security Rule:** The Default Catch-All block (Section 1) should be active on every server. For Cloudflare-proxied sites, you MUST configure the Global Cloudflare setup (Section 2) before adding site-specific templates.
 
 ---
 
-## 1. Global Cloudflare Setup (Prerequisite for CF proxied sites)
+## 1. Default Catch-All Block (The Security Bouncer)
+**File Location:** `/etc/nginx/sites-available/default` (Symlinked to `sites-enabled`)
+
+This is your server's primary defense against IP scanners and automated bots. If a request hits your server via direct IP or an unknown/malicious domain pointing to your IP, this block instantly drops the connection without returning any HTML or standard error page. 
+
+**CRITICAL PRIVACY RULE:** Never use your real domain's SSL certificate in this default block, as it will leak your real domain name during direct IP scans. Always use a dummy certificate.
+
+### Step A: Generate a Dummy Certificate (15-Year Validity)
+Run this command once on the server to create a fake 15-year certificate to match Cloudflare's maximum origin certificate lifespan. (Hit Enter if it asks for any details).
+```bash
+sudo openssl req -x509 -nodes -days 5475 -newkey rsa:2048 -keyout /etc/ssl/private/dummy.key -out /etc/ssl/certs/dummy.crt -subj "/CN=fake-domain.com"
+```
+
+### Step B: The Bouncer Configuration
+Replace the contents of the default file with this configuration:
+
+```nginx
+server {
+    # Listen on both IPv4 and IPv6 as the default server
+    listen 80 default_server;
+    listen [::]:80 default_server;
+    
+    # Listen on port 443 (HTTPS) to catch encrypted direct IP scanners
+    listen 443 ssl default_server;
+    listen [::]:443 ssl default_server;
+    
+    # Dummy SSL Paths (Prevents domain name leakage during SSL Handshake)
+    ssl_certificate /etc/ssl/certs/dummy.crt;
+    ssl_certificate_key /etc/ssl/private/dummy.key;
+
+    # The underscore (_) catches any unmapped domain or direct IP
+    server_name _; 
+
+    # 444 is a special Nginx code that immediately drops the connection (No Response)
+    return 444; 
+}
+```
+
+---
+
+## 2. Global Cloudflare Setup (The Real IP Module)
 **File Location:** `/etc/nginx/conf.d/cloudflare.conf`
-*(Do not put this inside individual site configurations. Set it once globally.)*
+*(Set globally, do NOT put this inside individual site blocks).*
+
+To make Nginx natively replace Cloudflare's proxy IPs with the actual visitor's IP in your access logs and security tools (like Fail2ban), you must use these two essential directives:
+
+*   `set_real_ip_from <IP_Range>;`
+    *   **What it does:** Tells Nginx to *trust* these specific IP ranges (Cloudflare's network). 
+    *   **Why you need it:** Nginx shouldn't trust just anyone who sends a fake IP header. By defining Cloudflare's IPs here, Nginx knows: *"If a request comes from these specific servers, I am allowed to trust the hidden header they send."*
+
+*   `real_ip_header CF-Connecting-IP;`
+    *   **What it does:** Instructs Nginx to look inside this exact header (`CF-Connecting-IP`) to extract the true visitor's IP address.
+    *   **Why you need it:** Once Nginx verifies the request came from a trusted Cloudflare IP, it permanently overwrites Nginx's internal `$remote_addr` variable. Because of this single line, your logs and Fail2ban will automatically see the real user.
 
 ```nginx
 # IPv4 Ranges
@@ -43,7 +93,7 @@ real_ip_header CF-Connecting-IP;
 
 ---
 
-## 2. Modern App (Node.js backend / Next.js) — WITH Cloudflare
+## 3. Modern App (Node.js backend / Next.js) — WITH Cloudflare
 Use this when the application relies on WebSockets (Live Reload, Chat) and is proxied through Cloudflare.
 
 **File Location:** `/etc/nginx/sites-available/yourdomain`
@@ -58,7 +108,7 @@ server {
     error_log /var/log/nginx/yourdomain_error.log warn;
 
     location / {
-        proxy_pass http://127.0.0.1:3000; # Change backend port if needed
+        proxy_pass http://127.0.0.1:3000; 
 
         # WebSockets Support
         proxy_http_version 1.1;
@@ -80,9 +130,23 @@ server {
 }
 ```
 
+> **📝 PRO-TIP: SSL Configuration (Cloudflare Origin vs. Let's Encrypt)**
+> 
+> **Scenario A: Using Cloudflare Origin Certificates (Full Strict Mode)**
+> If your domain is proxied through Cloudflare and you are using their Origin CA, you must manually update the server block:
+> 1. Change `listen 80;` to `listen 443 ssl;`
+> 2. Inject the certificate paths inside the server block:
+>    `ssl_certificate /etc/ssl/cloudflare/cert.pem;`
+>    `ssl_certificate_key /etc/ssl/cloudflare/key.pem;`
+> 
+> **Scenario B: Using Let's Encrypt / Certbot (Direct VPS / No Proxy)**
+> If you are NOT using Cloudflare, leave the server block exactly as it is (`listen 80;`) and simply run:
+> `sudo certbot --nginx -d yourdomain.com`
+> Certbot will automatically duplicate the block, configure the 443 SSL paths, and set up the HTTP to HTTPS (80 to 443) redirect for you. Do not manually type the SSL paths.
+
 ---
 
-## 3. Modern App (Node.js backend / Next.js) — NO Cloudflare (Direct)
+## 4. Modern App (Node.js backend / Next.js) — NO Cloudflare (Direct)
 Use this for standard VPS deployments without Cloudflare proxy.
 
 ```nginx
@@ -116,7 +180,7 @@ server {
 
 ---
 
-## 4. Static SPA (React / Vue / Angular)
+## 5. Static SPA (React / Vue / Angular)
 Use this when hosting a compiled static build (e.g., `npm run build`). Single Page Applications (SPAs) require routing all requests back to `index.html`.
 
 ```nginx
@@ -151,7 +215,7 @@ server {
 
 ---
 
-## 5. PHP / WordPress Site
+## 6. PHP / WordPress Site
 Use this for standard PHP applications. Requires `php-fpm` to be installed on the VPS.
 
 ```nginx
@@ -186,7 +250,7 @@ server {
 
 ---
 
-## 6. Full-Stack App (Frontend + Backend on Same Domain + CF Proxied)
+## 7. Full-Stack App (Frontend + Backend on Same Domain + CF Proxied)
 Use this when hosting both a static frontend (React/Vue) and an API backend (Node.js) on the exact same domain to avoid CORS issues and save resources. 
 - `/` serves the static React build.
 - `/api/` proxies requests to the Node.js backend.
@@ -210,11 +274,10 @@ server {
     # 2. BACKEND: Proxy all API requests to Node.js
     location /api/ {
         # Note: Depending on your Node app, you might need to strip the '/api' prefix.
-        # For the trailing slash look at the routes folder of the project.
         # But generally, just passing it to the backend port works if the backend expects it.
         proxy_pass http://127.0.0.1:3000;
 
-        # WebSockets Support (if the backend uses Socket.io etc.)
+        # WebSockets Support
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection "upgrade";
@@ -242,12 +305,10 @@ server {
 
 ---
 
-## 7. [BONUS] Auto-Update Cloudflare IPs (Pro-Level Automation)
+## 8. [BONUS] Auto-Update Cloudflare IPs (Pro-Level Automation)
 Cloudflare rarely changes their IP ranges, so a static list is usually fine. However, for premium clients, you can set up a bash script and a cron job to automatically fetch and update these IPs weekly. This guarantees the server will never block real users if Cloudflare updates their network.
 
 ### Step 1: Create the Bash Script
-Create a script that fetches the official IPs, formats them for Nginx, tests the config, and safely reloads the server.
-
 **Command:**
 ```bash
 sudo nano /usr/local/bin/update-cloudflare-ips.sh
@@ -269,12 +330,12 @@ echo "# Auto-generated by cron - Cloudflare IPs" > $TEMP_FILE
 # Fetch IPv4
 echo "" >> $TEMP_FILE
 echo "# IPv4 Ranges" >> $TEMP_FILE
-curl -s https://www.cloudflare.com/ips-v4 | sed -e 's/^/set_real_ip_from /' -e 's/$/;/' >> $TEMP_FILE
+curl -s [https://www.cloudflare.com/ips-v4](https://www.cloudflare.com/ips-v4) | sed -e 's/^/set_real_ip_from /' -e 's/$/;/' >> $TEMP_FILE
 
 # Fetch IPv6
 echo "" >> $TEMP_FILE
 echo "# IPv6 Ranges" >> $TEMP_FILE
-curl -s https://www.cloudflare.com/ips-v6 | sed -e 's/^/set_real_ip_from /' -e 's/$/;/' >> $TEMP_FILE
+curl -s [https://www.cloudflare.com/ips-v6](https://www.cloudflare.com/ips-v6) | sed -e 's/^/set_real_ip_from /' -e 's/$/;/' >> $TEMP_FILE
 
 # Add the essential header directive
 echo "" >> $TEMP_FILE
@@ -307,10 +368,4 @@ sudo crontab -e
 **Add this line at the bottom:**
 ```bash
 0 2 * * 1 /usr/local/bin/update-cloudflare-ips.sh > /dev/null 2>&1
-```
-*(The `> /dev/null 2>&1` part ensures it runs silently in the background without spamming system mail).*
-
-**Test using:** 
-```bash
-sudo /usr/local/bin/update-cloudflare-ips.sh
 ```

@@ -175,6 +175,7 @@ NODE_OPTIONS=--openssl-legacy-provider npm run build
 **File:** `/etc/nginx/sites-available/pern2-frontend`
 ```nginx
 server {
+    listen 80;
     server_name pern-stack.tmux.qzz.io;
 
     root /var/www/pern2-frontend/client/build;
