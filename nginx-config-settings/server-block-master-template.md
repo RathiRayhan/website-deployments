@@ -130,19 +130,32 @@ server {
 }
 ```
 
-> **📝 PRO-TIP: SSL Configuration (Cloudflare Origin vs. Let's Encrypt)**
+> **📝 PRO-TIP: SSL & IPv6 Configuration (Cloudflare Origin vs. Let's Encrypt)**
 > 
+> **⚠️ CRITICAL IPv6 CHECK:** Before applying ANY IPv6 configurations (for port 80 or 443), you must verify if the server has a **Public IPv6 Address**. 
+> Run `ip -6 addr` and specifically look for the keyword **`scope global`**. 
+> 
+> - **✅ If you see `scope global`** (e.g., `inet6 2606:... scope global`), your server can receive IPv6 traffic from the internet. You MUST use the `listen [::]` lines.
+> - **❌ If the output is completely empty:** IPv6 is completely disabled at the kernel level. Using `listen [::]` **WILL CRASH** Nginx on reload.
+> - **⚠️ If you only see `scope host` (`::1`) or `scope link` (`fe80:...`):** Nginx won't crash, but the server has no public IPv6 routing. Do not use `listen [::]` as it serves no purpose and just clutters the config.
+>
 > **Scenario A: Using Cloudflare Origin Certificates (Full Strict Mode)**
-> If your domain is proxied through Cloudflare and you are using their Origin CA, you must manually update the server block:
-> 1. Change `listen 80;` to `listen 443 ssl;`
+> If your domain is proxied through Cloudflare and you are using their Origin CA, you must manually update the server block to support HTTPS:
+> 1. Replace `listen 80;` with:
+>    `listen 443 ssl;`
+>    `listen [::]:443 ssl;` *(Only add this second line if `scope global` was found!)*
 > 2. Inject the certificate paths inside the server block:
 >    `ssl_certificate /etc/ssl/cloudflare/cert.pem;`
 >    `ssl_certificate_key /etc/ssl/cloudflare/key.pem;`
 > 
 > **Scenario B: Using Let's Encrypt / Certbot (Direct VPS / No Proxy)**
-> If you are NOT using Cloudflare, leave the server block exactly as it is (`listen 80;`) and simply run:
-> `sudo certbot --nginx -d yourdomain.com`
-> Certbot will automatically duplicate the block, configure the 443 SSL paths, and set up the HTTP to HTTPS (80 to 443) redirect for you. Do not manually type the SSL paths.
+> If you are NOT using Cloudflare, configure your base server block for port 80 first:
+> 1. Make sure your base block has:
+>    `listen 80;`
+>    `listen [::]:80;` *(Only add this second line if `scope global` was found!)*
+> 2. Then simply run:
+>    `sudo certbot --nginx -d yourdomain.com`
+> Certbot will automatically duplicate the block, configure the 443 SSL paths (including IPv6 if it was enabled in step 1), and set up the HTTP to HTTPS redirect for you. Do not manually type the SSL paths.
 
 ---
 
