@@ -22,7 +22,7 @@ Create the configuration file: `sudo nano /etc/nginx/sites-available/my-portfoli
 ```nginx
 server {
     listen 80;
-    server_name <your_domain.com> www.<your_domain.com>;
+    server_name your_domain.com www.your_domain.com;
 
     location / {
         root /var/www/my-portfolio;
@@ -47,12 +47,11 @@ Create the configuration file: `sudo nano /etc/nginx/sites-available/backend-app
 ```nginx
 server {
     listen 80;
-    server_name <your_domain.com> www.<your_domain.com>;
+    server_name your_domain.com www.your_domain.com;
 
     location / {
-        proxy_pass [http://127.0.0.1:8080](http://127.0.0.1:8080);
+        proxy_pass http://127.0.0.1:8080;
         
-        # Production Standard Proxy Headers
         # Ensures the backend application receives the client's actual IP, not the Nginx server's IP.
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
@@ -96,7 +95,7 @@ sudo ln -s /opt/certbot/bin/certbot /usr/local/bin/certbot
 ### Step 3: Provision SSL Certificates
 Execute the automated Nginx plugin. This will solve the ACME challenge, generate certificates, and automatically inject `listen 443 ssl` and `return 301` (HTTPS redirect) into the Nginx block.
 ```bash
-sudo certbot --nginx -d <your_domain.com> -d www.<your_domain.com>
+sudo certbot --nginx -d your_domain.com -d www.your_domain.com
 ```
 
 ### Step 4: Zero-Touch Auto-Renewal
