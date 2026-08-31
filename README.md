@@ -25,9 +25,18 @@ Core infrastructure setup, automation, and system hardening.
 | Initial Linux Server Setup & Hardening | [View Runbook](./server-setup/01-linux-server-setup.md) |
 | Nginx Reverse Proxy & SSL Configuration | [View Runbook](./server-setup/02-nginx-ssl.md) |
 | Bash Scripting & Automation (Cron) | [View Runbook](./server-setup/03-bash-scripting-automation.md) |
-| Server Disaster Recovery SOP | [View Runbook](./server-setup/04.server-disaster-recovery-SOP.md) |
+| Server Disaster Recovery SOP | [View Runbook](./server-setup/04-server-disaster-recovery-SOP.md) |
+| Fail2ban Setup | [View Runbook](./server-setup/05-fail2ban-setup.md) |
 
-### 💾 2. Database Migration & Disaster Recovery
+### ⚙️ 2. Nginx Configuration & Deep Dives
+Advanced routing, templates, and reverse proxy settings.
+| Topic | Documentation |
+|-------|---------------|
+| Nginx API Routing & Path Manipulation (Regex) | [View Runbook](./nginx-config-settings/api-block-notes.md) |
+| Reverse Proxy Headers Explained | [View Runbook](./nginx-config-settings/reverse-proxy-headers-explained.md) |
+| Server Block Master Template | [View Runbook](./nginx-config-settings/server-block-master-template.md) |
+
+### 💾 3. Database Migration & Disaster Recovery
 Production standards for backing up, transferring, and restoring databases.
 | Database | Documentation |
 |----------|---------------|
@@ -35,17 +44,18 @@ Production standards for backing up, transferring, and restoring databases.
 | **MySQL / MariaDB** | [View Runbook](./database-backup-restore/mysql-mariadb-backup-restore.md) |
 | **MongoDB** (Local & Atlas) | [View Runbook](./database-backup-restore/mongodb-backup-restore.md) |
 
-### 🌐 3. Full-Stack Application Deployments
+### 🌐 4. Full-Stack Application Deployments
 End-to-end deployment guides for modern web stacks.
 | Stack / Project | Technologies Used | Documentation |
 |-----------------|-------------------|---------------|
-| **PERN Stack Project** | PostgreSQL, Express, React, Node.js | [View Runbook](./PERN-Stack-Project-Deployment-VPS.md) |
+| **PERN 2.0 (Multiple VPS)** | PostgreSQL, Express, React, Node.js (Decoupled) | [View Runbook](./PERN-Stack-2.0-Multiple-VPS-Decoupled-Deployment.md) |
+| **PERN Stack (Single VPS)** | PostgreSQL, Express, React, Node.js | [View Runbook](./PERN-Stack-Project-Deployment-VPS.md) |
 | **MERN E-commerce** | MongoDB, Express, React, Node.js | [View Runbook](./MERN-Ecommerce-Deployment.md) |
 | **MERN Single VPS** | Nginx, PM2, MongoDB | [View Runbook](./MERN-Single-VPS-Deployment.md) |
 | **Next.js Taxonomy App** | Next.js, Nginx, PM2 | [View Runbook](./Nextjs-Taxonomy-App-Deployment.md) |
-| **React.js / Vite Frontend** | Vite, React, Nginx (Static) | [View Runbook](./Reactjs-Vite-Frontend-Deploy.md) |
+| **React.js / Vite Frontend**| Vite, React, Nginx (Static) | [View Runbook](./Reactjs-Vite-Frontend-Deploy.md) |
 
-### 📝 4. CMS & PHP Deployments
+### 📝 5. CMS & PHP Deployments
 Optimized hosting setups for PHP-based applications.
 | Project | Technologies Used | Documentation |
 |---------|-------------------|---------------|
