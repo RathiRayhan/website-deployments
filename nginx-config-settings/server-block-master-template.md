@@ -228,10 +228,10 @@ server {
 
 ---
 
-## 6. PHP / WordPress Site
-Use this for standard PHP applications. Requires `php-fpm` to be installed on the VPS.
+## 6. PHP / WordPress Site (Production Hardened)
+Use this for standard PHP applications and WordPress. Requires `php-fpm` to be installed on the VPS. 
+This block includes advanced security and caching rules specifically designed for WordPress.
 
-```nginx
 server {
     listen 80;
     server_name yourdomain.com www.yourdomain.com;
@@ -258,8 +258,27 @@ server {
     location ~ /\. {
         deny all;
     }
+    
+    # Security: Prevent PHP execution in uploads directory (Stops malware/shells)
+    location ~* /wp-content/uploads/.*\.php$ {
+        deny all;
+    }
+
+    # Security: Block xmlrpc.php (Prevents DDoS and brute force attacks)
+    location = /xmlrpc.php {
+        deny all;
+        access_log off;
+        log_not_found off;
+    }
+    
+    # Performance: Cache static assets aggressively
+    location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ {
+        expires max;
+        log_not_found off;
+    }
 }
-```
+
+> Note: Delete the wp-content and xmlrpc location blocks if deploying a custom PHP/Laravel app that is NOT WordPress.
 
 ---
 
