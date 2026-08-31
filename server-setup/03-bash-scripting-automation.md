@@ -146,7 +146,7 @@ set -e
 # ==========================================
 SOURCE_DIR="/home/harry/important_data"
 BACKUP_TEMP_DIR="/tmp"
-REMOTE_VAULT="/tmp/backup_vault/" # Note: Use user@remote_ip:/path/ for remote servers
+REMOTE_VAULT="/opt/backup_vault/" # Note: Use user@remote_ip:/path/ for remote servers
 
 # Generate a unique timestamped filename
 BACKUP_FILENAME="backup_$(date +%Y-%m-%d_%H-%M-%S).tar.gz"
@@ -181,7 +181,7 @@ To prevent the destination server's storage from overflowing, a retention policy
 
 ```bash
 # Delete .tar.gz files in the vault older than 7 days
-find /tmp/backup_vault/ -type f -name "*.tar.gz" -mtime +7 -delete
+find /opt/backup_vault/ -type f -name "*.tar.gz" -mtime +7 -delete
 ```
 
 ### 3.5 Backup Troubleshooting

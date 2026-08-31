@@ -103,8 +103,8 @@ server {
         fastcgi_pass unix:/var/run/php/php8.x-fpm.sock;
     }
 
-    # Security: Block access to hidden configuration files
-    location ~ /\.ht {
+    # Security: Block access to hidden files (.env, .git, .htaccess, etc.)
+    location ~ /\. {
         deny all;
     }
 }

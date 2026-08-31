@@ -52,10 +52,11 @@ DATABASE_URL="mysql://taxonomy_user:StrongPassword_123@localhost:3306/taxonomy"
 Since the project includes a `pnpm-lock.yaml`, `pnpm` must be used instead of `npm`. Install it globally first: `sudo npm install -g pnpm`.
 
 > **Troubleshooting Note (OOM & Low RAM):** Running `pnpm install` on a 1GB RAM server may get stuck or result in Out Of Memory (OOM) errors. 
-> *Solution:* Create a 2GB swap file. Even with swap, Node.js needs to be explicitly told to utilize it. Spare 500MB for the OS, and allocate 2560MB (2.5GB) to Node.js using the following command:
-```bash
-NODE_OPTIONS="--max-old-space-size=2560" pnpm install
-```
+> *Solution:* Create a 2GB swap file so the OS has extra memory to page into. Then, to cap the V8 heap during memory-heavy Node steps (install/build), set a max heap size:
+> ```bash
+> NODE_OPTIONS="--max-old-space-size=2560" pnpm install
+> ```
+> Note: `--max-old-space-size` limits the V8 heap size during the Node process; the real fix for a 1GB server is the swap file itself.
 
 ## 5. Database Migration (Prisma Workflow)
 

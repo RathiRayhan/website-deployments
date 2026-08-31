@@ -48,8 +48,8 @@ cd /var/www/bludit
 sudo git clone https://github.com/bludit/bludit.git .
 
 # Enforce production security permissions for Nginx user
-sudo chown -R www-data:www-data /var/www/myphpapp
-sudo chmod -R 755 /var/www/myphpapp
+sudo chown -R www-data:www-data /var/www/bludit
+sudo chmod -R 755 /var/www/bludit
 ```
 
 ## Step 4: Configure Nginx Server Block
@@ -85,8 +85,8 @@ server {
         fastcgi_pass unix:/var/run/php/php8.x-fpm.sock;
     }
 
-    # Security: Block access to hidden configuration files
-    location ~ /\.ht {
+    # Security: Block access to hidden files (.env, .git, .htaccess, etc.)
+    location ~ /\. {
         deny all;
     }
 }
