@@ -134,7 +134,7 @@ limit_req_status 429;
 # In the relevant server block (API endpoints):
 location /api/ {
     limit_req zone=api_limit burst=10 nodelay;
-    proxy_pass [http://127.0.0.1:4000/](http://127.0.0.1:4000/);
+    proxy_pass http://127.0.0.1:4000/;
 }
 ```
 
