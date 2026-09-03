@@ -17,6 +17,8 @@ sudo tar -cvpzf /lightsail-os-backup.tar.gz \
   --exclude=/lightsail-os-backup.tar.gz \
   --exclude=/root/.cache \
   --exclude=/home/*/.cache \
+  --exclude=/root/.npm \
+  --exclude=/home/*/.npm \
   --exclude=/proc \
   --exclude=/tmp \
   --exclude=/sys \

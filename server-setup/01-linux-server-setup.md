@@ -85,3 +85,5 @@ Establish a secure baseline for a Linux production server (Ubuntu/Debian). This 
     To prevent external scanners from verifying the server is online via ping:
     *   `sudo nano /etc/ufw/before.rules`
     *   Find the `ok icmp codes` section and change the `echo-request` rule from `ACCEPT` to `DROP`.
+
+![Firewall active with minimal open ports](assets/ufw-status.png)

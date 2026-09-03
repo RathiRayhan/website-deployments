@@ -167,6 +167,7 @@ sudo tail -f /var/log/fail2ban.log
 ```
 *Note on unbanning:* The unban command returns a boolean integer: `1` (True) if the IP was successfully found and removed from the ban list, and `0` (False) if the IP was not in the ban list.
 
+![Active jails on a live server](assets/fail2ban-status.png)
 ---
 
 ## 6. Edge Cases: Reverse Proxies (Cloudflare)
