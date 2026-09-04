@@ -69,6 +69,8 @@ pm2 startup
 ```
 *Note: Verify the backend is running without errors using `pm2 logs e-commerce-backend`.*
 
+![PM2: backend online and persistent](assets/pm2-status.png)
+
 ---
 
 ## Step 3: Frontend Build
@@ -155,6 +157,7 @@ If the domain is managed via Cloudflare and DNS Proxy (Orange Cloud) is enabled,
    ```
 3. Once the certificate is successfully issued, turn the Cloudflare proxy back ON (Orange Cloud) and ensure SSL/TLS encryption mode is set to "Full (strict)".
 
+![Live store with valid SSL](assets/site-padlock.png)
 ---
 
 ## Step 6: Post-Deployment Troubleshooting & Fixes
