@@ -27,6 +27,7 @@ Core infrastructure setup, automation, and system hardening.
 | Bash Scripting & Automation (Cron) | [View Runbook](./server-setup/03-bash-scripting-automation.md) |
 | Server Disaster Recovery SOP | [View Runbook](./server-setup/04-server-disaster-recovery-SOP.md) |
 | Fail2ban Setup | [View Runbook](./server-setup/05-fail2ban-setup.md) |
+| Email Deliverability | [View Runbook](./server-setup/06-email-deliverability-spf-dkim-dmarc.md) |
 
 ### ⚙️ 2. Nginx Configuration & Deep Dives
 Advanced routing, templates, and reverse proxy settings.
